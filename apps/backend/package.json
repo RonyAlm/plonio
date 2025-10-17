@@ -1,5 +1,5 @@
 {
-  "name": "apps",
+  "name": "backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,5 +12,8 @@
   "license": "ISC",
   "devDependencies": {
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "plonio-domain": "file:../../../domain/dist/index.js"
   }
 }

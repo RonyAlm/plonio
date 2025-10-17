@@ -1,14 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    // "baseUrl": ".",
     "outDir": "dist",
     "rootDir": "src",
-    // "paths": {
-    //   "@/*": [
-    //     "src/*"
-    //   ]
-    // }
+    "paths": {
+      "plonio-domain": ["../../../dist/index.js"]
+    }
   },
   "include": [
     "src/**/*"
