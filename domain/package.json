@@ -2,10 +2,10 @@
   "name": "domain",
   "version": "1.0.0",
   "description": "Domain of the project",
-  "main": "index.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "test": "vitest"
+    "build": "tsc -p tsconfig.json"
   },
   "keywords": [],
   "author": "",
