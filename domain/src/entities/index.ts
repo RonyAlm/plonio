@@ -1,4 +1,4 @@
-export * from './User.js'
+export * from './user.js'
 export * from './Project.js'
 export * from './Task.js'
 export * from './Member.js'
