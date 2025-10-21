@@ -26,7 +26,7 @@ export async function loginUser({ dependencies, payload }: LoginUserParams): Log
         return { isSuccess: false, error: "Password or email invalid" };
     }
 
-    const accessToken = dependencies.tokenService.generateAccessToken({ userId: user.id, role: user.role });
+    const accessToken = dependencies.tokenService.generateAccessToken({ userId: user.id, role: user.role, email: user.email });
 
     return { isSuccess: true,  user: user, accessToken };
 

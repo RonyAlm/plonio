@@ -33,7 +33,6 @@ describe('RegisterUser', async () => {
                 id: input.id,
                 name: input.name,
                 email: input.email,
-                password: expect.any(String),
                 role: input.role,
                 createdAt: input.createdAt,
                 updatedAt: input.updatedAt
@@ -89,7 +88,18 @@ describe('RegisterUser', async () => {
             });
 
         expect(result.isSuccess).toBe(true);
-        expect(result.isSuccess && result.user.password).not.toBe(input.password);
+        expect(result.isSuccess && result).toStrictEqual({
+            isSuccess: true,
+            user: {
+                id: input.id,
+                name: input.name,
+                email: input.email,
+                role: input.role,
+                createdAt: input.createdAt,
+                updatedAt: input.updatedAt
+            }
+        });
+        
     });
 
 })

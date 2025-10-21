@@ -9,7 +9,9 @@ export interface RegisterUserParams {
     payload: User;
 }
 
-export type RegisterUserResult = Promise<{ isSuccess: true; user: User } | { isSuccess: false; error: string }>
+type UserSecure = Omit<User, "password">
+
+export type RegisterUserResult = Promise<{ isSuccess: true; user: UserSecure } | { isSuccess: false; error: string }>
 
 export async function registerUser({ dependencies, payload }: RegisterUserParams): RegisterUserResult {
 
@@ -23,6 +25,19 @@ export async function registerUser({ dependencies, payload }: RegisterUserParams
 
     const user = await dependencies.userService.save({ ...payload, password: hashedPassword });
 
-    return { isSuccess: true, user };
+    if (!user) {
+        return { isSuccess: false, error: "Error creating user" };
+    }
+
+    const userResponse: UserSecure = {
+        id: user.id || crypto.randomUUID(),
+        name: user.name,
+        email: user.email,
+        role: user.role || "USER",
+        createdAt: user.createdAt || new Date(),
+        updatedAt: user.updatedAt || new Date()
+    };
+
+    return { isSuccess: true, user: userResponse };
 
 }
