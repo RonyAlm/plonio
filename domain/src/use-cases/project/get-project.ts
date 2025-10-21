@@ -1,6 +1,7 @@
+import { Project } from "../../entities/Project.js"
 import { ProjectService } from "../../services/project-service.js"
 
-export interface GetProject {
+export interface GetProjectParams {
     dependencies: {
         projectService: ProjectService
     },
@@ -9,20 +10,22 @@ export interface GetProject {
     }
 }
 
-export async function getProject({ dependencies, payload } : GetProject) {
-   const project = await dependencies.projectService.getById(payload.id)
+type GetProjectResult = Promise<{ isSuccess: boolean, project?: Partial<Project>, error?: string}>
+
+export async function getProject({ dependencies, payload } : GetProjectParams) : GetProjectResult {
+
+   if (payload.id === "") {
+       return { isSuccess: false, error: "Project id is required" };
+   }
+
+   const project = await dependencies.projectService.findById(payload.id)
 
    if (!project) {
-       return undefined
+       return { isSuccess: false, error: "Project not found" };
    }
 
    return {
-       id: payload.id,
-       name: project?.name,
-       description: project?.description,
-       ownerId: project?.ownerId,
-       members: project?.members,
-       createdAt: project?.createdAt,
-       updatedAt: project?.updatedAt
+       isSuccess: true,
+       project
    }
 }

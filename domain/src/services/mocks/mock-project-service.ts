@@ -7,7 +7,7 @@ const idGenerator = () => crypto.randomUUID();
 export function MokedProjectService(): ProjectService {
     const projects: Project[] = [
         {
-            id: idGenerator(),
+            id: "1",
             name: "Project 1",
             description: "Description 1",
             ownerId: "1",

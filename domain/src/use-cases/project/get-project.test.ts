@@ -1,57 +1,31 @@
 import { describe, test, expect } from "vitest";
 import { getProject } from "./get-project.js";
 import { Project } from "../../entities/Project.js";
-
-const projectData: Project[] = [
-    {
-        id: "1",
-        name: "Project 1",
-        description: "Description 1",
-        ownerId: "1",
-        members: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-    },
-    {
-        id: "2",
-        name: "Project 2",
-        description: "Description 2",
-        ownerId: "2",
-        members: [],
-        createdAt: new Date(),
-        updatedAt: new Date()
-    }
-]
+import { MokedProjectService } from "../../services/mocks/mock-project-service.js";
 
 describe("GetProject", async () => {
    
-    const projectService = {
-        getById: async (id: string) => {
-            return projectData.find(project => project.id === id)
-        },
-
-        getAll: async () => {
-            return projectData
-        }
-    }
+    const projectService = MokedProjectService();
 
     test("should get a project by id",  async () => {
-        const result = await getProject({ dependencies: { projectService }, payload: {id: "2"}});
+        const result = await getProject({ dependencies: { projectService }, payload: {id: "1"}});
 
-        expect(result).toStrictEqual({
-            id: "2",
-            name: "Project 2",
-            description: "Description 2",
-            ownerId: "2",
-            members: [],
-            createdAt: expect.any(Date),
-            updatedAt: expect.any(Date)
-        })
+        expect(result.isSuccess).toBe(true);
+        expect(result.isSuccess && result.project).toBeDefined();
+        expect(result.isSuccess && result.project && result.project.id).toBe("1");
     });
 
     test("should get error if project not found",  async () => {
         const result = await getProject({ dependencies: { projectService }, payload: {id: "3"}});
 
-        expect(result).toBeUndefined()
+        expect(result.isSuccess).toBe(false);
+        expect(result.error).toBe("Project not found");
+    });
+
+    test("should get error if id is empty",  async () => {
+        const result = await getProject({ dependencies: { projectService }, payload: {id: ""}});
+
+        expect(result.isSuccess).toBe(false);
+        expect(result.error).toBe("Project id is required");
     });
 });
