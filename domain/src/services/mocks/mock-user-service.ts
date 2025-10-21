@@ -4,7 +4,7 @@ import { PasswordService, TokenService, UserService } from "../user-service.js";
 const idGenerator = () => crypto.randomUUID();
 
 
-export function MokedUserService(): UserService{
+export function MokedUserService(): UserService {
     const users: User[] = [{
         id: '1324',
         name: "Ema Paz",
@@ -13,7 +13,19 @@ export function MokedUserService(): UserService{
         role: "USER",
         createdAt: new Date(),
         updatedAt: new Date()
-    }];
+    },
+    {
+        id: '1325',
+        name: "Ronaldo Almiron",
+        email: "ronaldo@ronaldo.com",
+        password: "hashed_ronaldo123",
+        role: "ADMIN",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+
+
+    ];
 
     return {
         async save(user) {
@@ -31,7 +43,15 @@ export function MokedUserService(): UserService{
             if (index === -1) return null;
             users[index] = userData;
             return userData;
+        },
+        async updateRole(idUser, role = "USER") {
+            const index = users.findIndex((user) => user.id === idUser);
+            const user = users[index];
+            if (!user) return null;
+            user.role = role;
+            return user;
         }
+
     };
 };
 
