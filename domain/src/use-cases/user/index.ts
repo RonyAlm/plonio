@@ -1,2 +1,6 @@
 export * from './register-user.js'
 export * from './login-user.js'
+export * from './get-user.js'
+export * from './update-user-profile.js'
+export * from './get-user-profile.js'
+export * from './assign-role.js'
