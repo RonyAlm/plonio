@@ -1,12 +1,14 @@
 import { User } from "../../entities/user.js"
-import { PasswordService, UserService } from "../../services/user-service.js"
+import { PasswordService, TokenService, UserService } from "../../services/user-service.js"
 
 interface UpdateUserProfileParams {
     dependencies: {
         userService: UserService
         passwordService: PasswordService
+        tokenService: TokenService
     }
     payload: {
+        token: string
         idUser: string
         input: Partial<User>
     }
@@ -23,6 +25,9 @@ export async function updateUserProfile({ dependencies, payload }: UpdateUserPro
     if (!existingUser) {
         return { isSuccess: false, error: "User not found" };
     }
+
+    const userToken = await dependencies.tokenService.verifyAccessToken(payload.token);
+    if (!userToken) return { isSuccess: false, error: "Invalid token" };
 
     let password = existingUser.password;
     let email = existingUser.email;
