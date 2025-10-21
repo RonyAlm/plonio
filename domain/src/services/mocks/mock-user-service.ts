@@ -1,10 +1,12 @@
 import { User } from "../../entities/user.js";
 import { PasswordService, TokenService, UserService } from "../user-service.js";
 
+const idGenerator = () => crypto.randomUUID();
+
 
 export function MokedUserService(): UserService{
     const users: User[] = [{
-        id: crypto.randomUUID(),
+        id: '1324',
         name: "Ema Paz",
         email: "ema@ema.com",
         password: "hashed_ema123",
@@ -18,8 +20,17 @@ export function MokedUserService(): UserService{
             users.push(user);
             return user;
         },
+        async findById(id) {
+            return users.find((user) => user.id === id) || null;
+        },
         async findByEmail(email) {
             return users.find((user) => user.email === email) || null;
+        },
+        async update(userData) {
+            const index = users.findIndex((user) => user.id === userData.id);
+            if (index === -1) return null;
+            users[index] = userData;
+            return userData;
         }
     };
 };
