@@ -1,31 +1,30 @@
-import { User } from "../../entities/user.js";
-import { TokenService, UserService } from "../../services/user-service.js";
+import { UserSecure } from "../../entities/user.js";
+import { UserService } from "../../services/user-service.js";
 
 export interface GetUserProfileParams {
     dependencies: {
-        userService: UserService,
-        tokenService: TokenService
+        userService: UserService
     }
     payload: {
-        token: string
-    };
+        userId: string
+    }
 }
 
-type UserSecure = Omit<User, "password">
-
-export type GetUserProfileResult = Promise<{ isSuccess: boolean, error?: string, user?: UserSecure }>;
+export type GetUserProfileResult = Promise<{ isSuccess: boolean, error?: string, data?: UserSecure }>;
 
 export async function getUserProfile({ dependencies, payload }: GetUserProfileParams): GetUserProfileResult {
 
-    const userToken = await dependencies.tokenService.verifyAccessToken(payload.token);
-    if (!userToken) return { isSuccess: false, error: "Invalid token" };
+    const { userId } = payload;
+    const { userService } = dependencies;
 
-    const user = await dependencies.userService.findByEmail(userToken.email);
+    if (!userId) return { isSuccess: false, error: "User ID is required" };
+
+    const user = await userService.findById(userId);
 
     if (!user) return { isSuccess: false, error: "User not found" };
 
     const userResponse: UserSecure = {
-        id: user.id || crypto.randomUUID(),
+        id: userId,
         name: user.name,
         email: user.email,
         role: user.role || "USER",
@@ -35,6 +34,6 @@ export async function getUserProfile({ dependencies, payload }: GetUserProfilePa
 
     return {
         isSuccess: true,
-        user: userResponse
+        data: userResponse
     };
 }

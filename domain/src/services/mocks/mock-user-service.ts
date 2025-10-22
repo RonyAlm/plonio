@@ -86,7 +86,7 @@ export function MokedPasswordService(): PasswordService {
     }
 };
 
-export function MokedTokenService(): AuthService {
+export function MokedAuthService(): AuthService {
     return {
         async generateTokens(userId) {
             return {
