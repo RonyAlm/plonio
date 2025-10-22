@@ -9,7 +9,7 @@ describe("GetUserProfile", async () => {
 
   test("should get user profile successfully", async () => {
 
-    userIdToken = "1324";
+    userIdToken = "user-1";
 
     const result = await getUserProfile({
       dependencies: {
