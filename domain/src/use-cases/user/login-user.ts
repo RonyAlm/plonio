@@ -1,33 +1,41 @@
-import { User } from "../../entities/user.js";
-import { UserService, PasswordService, TokenService } from "../../services/user-service.js";
+import { User, UserSecure } from "../../entities/user.js";
+import { UserService } from "../../services/user-service.js";
+import { PasswordService } from "../../services/password-service.js";
+import { AuthService } from "../../services/auth-service.js";
 
 export interface LoginUserParams {
     dependencies: {
         userService: UserService,
         passwordService: PasswordService,
-        tokenService: TokenService
+        authService: AuthService
     };
     payload: Pick<User, "email" | "password">;
 }
 
-export type LoginUserResult = Promise<{ isSuccess: boolean; user?: User; error?: string; accessToken?: string }>
+export type LoginUserResult = Promise<{ isSuccess: boolean; data?: { user: UserSecure; accessToken: string; refreshToken: string }; error?: string }>
 
 export async function loginUser({ dependencies, payload }: LoginUserParams): LoginUserResult {
-  
-    const user = await dependencies.userService.findByEmail(payload.email);
 
-    if (!user) {
-        return { isSuccess: false, error: "Password or email invalid" };
+    const { userService, passwordService, authService } = dependencies;
+
+    if (!payload.email || !payload.password) {
+        return { isSuccess: false, error: "Missing credentials" };
     }
 
-    const isValidPassword = await dependencies.passwordService.compare(payload.password, user.password);
-
-    if (!isValidPassword) {
-        return { isSuccess: false, error: "Password or email invalid" };
+    if (!payload.email.includes("@")) {
+        return { isSuccess: false, error: "Invalid email" };
     }
 
-    const accessToken = dependencies.tokenService.generateAccessToken({ userId: user.id, role: user.role, email: user.email });
+    const user = await userService.findByEmail(payload.email);
 
-    return { isSuccess: true,  user: user, accessToken };
+    if (!user || !user.id) {
+        return { isSuccess: false, error: "User not found" };
+    }
+
+    const isValid = await passwordService.compare(payload.password, user.password);
+    if (!isValid) return { isSuccess: false, error: "Invalid password" };
+
+    const tokens = await authService.generateTokens(user.id);
+    return { isSuccess: true, data: { user, ...tokens } };
 
 }
