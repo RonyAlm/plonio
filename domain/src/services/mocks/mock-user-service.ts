@@ -1,5 +1,7 @@
 import { User } from "../../entities/user.js";
-import { PasswordService, TokenService, UserService } from "../user-service.js";
+import { UserService } from "../user-service.js";
+import { PasswordService } from "../password-service.js";
+import { AuthService } from "../auth-service.js";
 
 const idGenerator = () => crypto.randomUUID();
 
@@ -29,8 +31,26 @@ export function MokedUserService(): UserService {
 
     return {
         async save(user) {
+            const id = user.id ?? idGenerator();
+            const role = user.role ?? "USER";
+            const createdAt = user.createdAt ?? new Date();
+            const updatedAt = new Date();
+
+            user.id = id;
+            user.role = role;
+            user.createdAt = createdAt;
+            user.updatedAt = updatedAt;
+
             users.push(user);
-            return user;
+
+            return {
+                id,
+                name: user.name,
+                email: user.email,
+                role,
+                createdAt,
+                updatedAt
+            };
         },
         async findById(id) {
             return users.find((user) => user.id === id) || null;
@@ -66,19 +86,18 @@ export function MokedPasswordService(): PasswordService {
     }
 };
 
-export function MokedTokenService(): TokenService {
+export function MokedTokenService(): AuthService {
     return {
-        generateAccessToken(payload) {
-            return `token_${JSON.stringify(payload)}`;
+        async generateTokens(userId) {
+            return {
+                accessToken: `accessToken_${userId}`,
+                refreshToken: `refreshToken_${userId}`
+            };
         },
-        generateRefreshToken(payload) {
-            return `refresh_${JSON.stringify(payload)}`;
-        },
-        verifyAccessToken(token) {
-            return token.startsWith("token_") ? JSON.parse(token.slice(6)) : null;
-        },
-        verifyRefreshToken(token) {
-            return token.startsWith("refresh_") ? JSON.parse(token.slice(8)) : null;
-        },
+        async verifyToken(token) {
+            return {
+                userId: `userId_${token}`
+            };
+        }
     }
 }

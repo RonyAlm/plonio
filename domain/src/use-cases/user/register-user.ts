@@ -1,43 +1,40 @@
-import { User } from "../../entities/user.js";
-import { UserService, PasswordService, TokenService } from "../../services/user-service.js";
+import { User, UserSecure } from "../../entities/user.js";
+import { PasswordService } from "../../services/password-service.js";
+import { UserService } from "../../services/user-service.js";
+
 
 export interface RegisterUserParams {
     dependencies: {
-        userService: UserService,
-        passwordService: PasswordService
+        userService: UserService;
+        passwordService: PasswordService;
     };
     payload: User;
 }
 
-type UserSecure = Omit<User, "password">
-
-export type RegisterUserResult = Promise<{ isSuccess: true; user: UserSecure } | { isSuccess: false; error: string }>
+export type RegisterUserResult = Promise<{ isSuccess: true; data: UserSecure } | { isSuccess: false; error: string }>
 
 export async function registerUser({ dependencies, payload }: RegisterUserParams): RegisterUserResult {
 
-    const existingUser = await dependencies.userService.findByEmail(payload.email);
+    const { userService } = dependencies;
+    const { passwordService } = dependencies;
 
-    if (existingUser) {
-        return { isSuccess: false, error: "Email already exists" };
-    }
+    if (!payload.email || !payload.password) return { isSuccess: false, error: "Missing credentials" };
 
-    const hashedPassword = await dependencies.passwordService.hash(payload.password);
+    const existing = await userService.findByEmail(payload.email);
+    if (existing) return { isSuccess: false, error: "Email already registered" };
 
-    const user = await dependencies.userService.save({ ...payload, password: hashedPassword });
-
-    if (!user) {
-        return { isSuccess: false, error: "Error creating user" };
-    }
-
-    const userResponse: UserSecure = {
-        id: user.id || crypto.randomUUID(),
-        name: user.name,
-        email: user.email,
-        role: user.role || "USER",
-        createdAt: user.createdAt || new Date(),
-        updatedAt: user.updatedAt || new Date()
+    const hashedPassword = await passwordService.hash(payload.password);
+    const newUser: User = {
+        id: crypto.randomUUID(),
+        name : payload.name,
+        email : payload.email,
+        password: hashedPassword,
+        role: "USER",
+        createdAt: new Date(),
+        updatedAt: new Date()
     };
 
-    return { isSuccess: true, user: userResponse };
+    const savedUser = await userService.save(newUser);
+    return { isSuccess: true, data: savedUser };
 
 }

@@ -1,21 +1,9 @@
-import { User, UserRole } from "../entities/user.js";
+import { User, UserRole, UserSecure } from "../entities/user.js";
 
 export interface UserService {
-    save: (user: User) => Promise<User>
+    save: (user: User) => Promise<UserSecure>
     findById: (id: string) => Promise<User | null>
     findByEmail: (email: string) => Promise<User | null>
     update: ( user: User) => Promise<User | null>
     updateRole: ( idUser: string, role: UserRole) => Promise<User | null>
-}
-
-export interface PasswordService {
-    hash: (password: string) => Promise<string>;
-    compare: (password: string, hashedPassword: string) => Promise<boolean>;
-}
-
-export interface TokenService {
-    generateAccessToken: (payload: object) => string;
-    generateRefreshToken: (payload: object) => string;
-    verifyAccessToken: (token: string) => Promise<User | null>;
-    verifyRefreshToken: (token: string) => Promise<User | null>;
 }

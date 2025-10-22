@@ -8,7 +8,7 @@ export const UserRole = {
 export type UserRole = typeof UserRole[keyof typeof UserRole]
 
 export interface User {
-    id: string;
+    id?: string;
     name: string;
     email: string;
     password: string;
@@ -16,3 +16,5 @@ export interface User {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+export type UserSecure = Omit<User, 'password'>
