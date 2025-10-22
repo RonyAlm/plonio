@@ -1,51 +1,35 @@
-import { User, UserRole } from "../../entities/user.js"
-import { TokenService, UserService } from "../../services/user-service.js"
+import { User, UserRole, UserSecure } from "../../entities/user.js"
+import { UserService } from "../../services/user-service.js"
 
 export interface AssignRoleParams {
     dependencies: {
-        userService: UserService,
-        tokenService: TokenService
+        userService: UserService
     }
     payload: {
-        token: string
+        idUserOwner: string,
         idUser: string
         role: UserRole
     }
 }
 
-type UserSecure = Omit<User, 'password'>
+type AssignRoleResult = Promise<{ isSuccess: boolean, data?: Partial<UserSecure>, error?: string }>
 
-type AssignRoleResult = Promise<{ isSuccess: boolean, user?: UserSecure, error?: string }>
+export async function assignRole({ dependencies, payload }: AssignRoleParams): AssignRoleResult {
 
-export async function assignRole({ dependencies, payload }: AssignRoleParams) : AssignRoleResult {
-   
-    const existingUser = await dependencies.userService.findById(payload.idUser);
+    const { userService } = dependencies;
+    const { idUser, role, idUserOwner } = payload;
 
-    if (!existingUser) {
-        return { isSuccess: false, error: "User not found" };
+    const rolUserOwner = await userService.findById(idUserOwner.trim());
+    if (!rolUserOwner) return { isSuccess: false, error: "User owner id is required" };
+
+    if (rolUserOwner.role !== 'ADMIN' && rolUserOwner.role !== 'MANAGER') {
+        return { isSuccess: false, error: "Only admin and manager can assign roles" };
     }
 
-    const userToken = await dependencies.tokenService.verifyAccessToken(payload.token);
-    if (!userToken) return { isSuccess: false, error: "Invalid token" };
+    const user = await userService.findById(idUser);
+    if (!user) return { isSuccess: false, error: "User not found" };
 
-    if (userToken.role !== 'ADMIN') {
-        return { isSuccess: false, error: "User does not have the ADMIN role" };
-    }
-
-    const user = await dependencies.userService.updateRole(payload.idUser, payload.role);
-
-    if (!user) {
-        return { isSuccess: false, error: "Error updating user role" };
-    }
-
-    const userResponse: UserSecure = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role || "USER",
-        createdAt: user.createdAt || new Date(),
-        updatedAt: user.updatedAt || new Date()
-    };
-
-    return { isSuccess: true, user: userResponse };
+    const updated = await userService.updateRole(idUser, role);
+    if (!updated) return { isSuccess: false, error: "User not found after role update" };
+    return { isSuccess: true, data: updated };
 }

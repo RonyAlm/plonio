@@ -1,89 +1,57 @@
 import { test, expect, describe, beforeAll } from "vitest";
 import { assignRole } from "./assign-role.js";
-import { MokedPasswordService, MokedTokenService, MokedUserService } from "../../services/mocks/mock-user-service.js";
-import { loginUser } from "./login-user.js";
+import { MokedUserService } from "../../services/mocks/mock-user-service.js";
 
 describe("AssignRole", async () => {
-    let tokenAdminRole: string;
-    let tokenUserRole: string;
 
-    beforeAll(async () => {
-        const userService = MokedUserService();
-        const passwordService = MokedPasswordService();
-        const tokenService = MokedTokenService();
-
-        const loginAdminRole = await loginUser({
-            dependencies: {
-                userService: userService,
-                passwordService: passwordService,
-                tokenService: tokenService
-            },
-            payload: {
-                email: "ronaldo@ronaldo.com",
-                password: "ronaldo123"
-            }
-        });
-
-        if (loginAdminRole.isSuccess && loginAdminRole.accessToken) {
-            tokenAdminRole = loginAdminRole.accessToken;
-        }
-
-        const loginUserRole = await loginUser({
-            dependencies: {
-                userService: userService,
-                passwordService: passwordService,
-                tokenService: tokenService
-            },
-            payload: {
-                email: "ema@ema.com",
-                password: "ema123"
-            }
-        });
-
-        if (loginUserRole.isSuccess && loginUserRole.accessToken) {
-            tokenUserRole = loginUserRole.accessToken;
-        }
-
-    });
+    const userService = MokedUserService();
 
     test("should assign role to user successfully", async () => {
-        const userService = MokedUserService();
-        const tokenService = MokedTokenService();
 
         const result = await assignRole({
-            dependencies: { userService, tokenService },
-            payload: { token: tokenAdminRole, idUser: "1324", role: "EDITOR" }
+            dependencies: { userService },
+            payload: { idUserOwner: 'admin-2', idUser: "user-1", role: "USER" }
         });
 
         expect(result.isSuccess).toBe(true);
-        expect(result.user).toBeDefined();
-        expect(result.user && result.user.role).toBe("EDITOR");
+        expect(result.isSuccess && result.data).toBeDefined();
+        expect(result.isSuccess && result.data && result.data.id).toBe("user-1");
+        expect(result.isSuccess && result.data && result.data.role).toBe("USER");
 
     });
 
     test("should return error if user not found", async () => {
-        const userService = MokedUserService();
-        const tokenService = MokedTokenService();
 
         const result = await assignRole({
-            dependencies: { userService, tokenService },
-            payload: { token: tokenAdminRole, idUser: "user-not-found", role: "ADMIN" }
+            dependencies: { userService },
+            payload: { idUserOwner: "admin-2", idUser: "user-not-found", role: "MANAGER" }
         });
 
         expect(result.isSuccess).toBe(false);
         expect(result.error).toBe("User not found");
     });
 
-    test("should return an error if the user does not have the ADMIN role", async () => {
-        const userService = MokedUserService();
-        const tokenService = MokedTokenService();
+    test("should return error if idUserOwner is empty", async () => {
 
         const result = await assignRole({
-            dependencies: { userService, tokenService },
-            payload: { token: tokenUserRole, idUser: "1324", role: "USER" }
+            dependencies: { userService },
+            payload: { idUserOwner: "", idUser: "1324", role: "MANAGER" }
         });
 
         expect(result.isSuccess).toBe(false);
-        expect(result.error).toBe("User does not have the ADMIN role");
+        expect(result.error).toBe("User owner id is required");
+        
+    });
+
+    test("should return error if not owner ADMIN or MANAGER", async () => {
+
+        const result = await assignRole({
+            dependencies: { userService },
+            payload: { idUserOwner: "user-1", idUser: "admin-2", role: "MANAGER" }
+        });
+
+        expect(result.isSuccess).toBe(false);
+        expect(result.error).toBe("Only admin and manager can assign roles");
+
     });
 });
