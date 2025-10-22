@@ -8,7 +8,7 @@ const idGenerator = () => crypto.randomUUID();
 
 export function MokedUserService(): UserService {
     const users: User[] = [{
-        id: '1324',
+        id: 'user-1',
         name: "Ema Paz",
         email: "ema@ema.com",
         password: "hashed_ema123",
@@ -17,7 +17,7 @@ export function MokedUserService(): UserService {
         updatedAt: new Date()
     },
     {
-        id: '1325',
+        id: 'admin-2',
         name: "Ronaldo Almiron",
         email: "ronaldo@ronaldo.com",
         password: "hashed_ronaldo123",
