@@ -7,8 +7,9 @@ describe('RegisterUser', async () => {
 
     const userService = MokedUserService();
     const passwordService = MokedPasswordService();
+    const dependencies = { userService, passwordService };
 
-    test('should register a user successfully', async () => {
+    test.only('should register a user successfully', async () => {
 
         const input: User = {
             name: 'Rony Almiron',
@@ -19,7 +20,7 @@ describe('RegisterUser', async () => {
 
         const result = await registerUser(
             {
-                dependencies: { userService, passwordService },
+                dependencies: dependencies,
                 payload: input
             });
 
@@ -37,37 +38,98 @@ describe('RegisterUser', async () => {
         });
     })
 
-    test('should return error if missing credentials', async () => {
+    test.only('should return error if email or password is empty', async () => {
 
         const result = await registerUser(
             {
-                dependencies: { userService, passwordService },
+                dependencies: dependencies,
                 payload: {
                     name: 'Rony Almiron',
+                    email: '',
+                    password: '',
+                    role: 'USER'
                 }
             });
 
         expect(result.isSuccess).toBe(false);
         expect(result).toStrictEqual({
             isSuccess: false,
-            error: "Missing credentials"
+            error: "Email and password are required"
         });
     })
 
-    test('should return error if user already exists', async () => {
+    test.only('should return error if name is invalid', async () => {
+
+        const result = await registerUser(
+            {
+                dependencies: dependencies,
+                payload: {
+                    name: '',
+                    email: 'ema@ema.com',
+                    password: 'password123',
+                    role: 'USER'
+                }
+            });
+
+        expect(result.isSuccess).toBe(false);
+        expect(result).toStrictEqual({
+            isSuccess: false,
+            error: "Invalid name"
+        });
+    })
+
+    test.only('should return error if email is invalid', async () => {
+
+        const result = await registerUser(
+            {
+                dependencies: dependencies,
+                payload: {
+                    name: 'Rony Almiron',
+                    email: 'emaema.com',
+                    password: 'password123',
+                    role: 'USER'
+                }
+            });
+
+        expect(result.isSuccess).toBe(false);
+        expect(result).toStrictEqual({
+            isSuccess: false,
+            error: "Invalid email"
+        });
+    })
+
+    test.only('should return error if password is invalid', async () => {
+
+        const result = await registerUser(
+            {
+                dependencies: dependencies,
+                payload: {
+                    name: 'Rony Almiron',
+                    email: 'ema@ema.com',
+                    password: 'ema',
+                    role: 'USER'
+                }
+            });
+
+        expect(result.isSuccess).toBe(false);
+        expect(result).toStrictEqual({
+            isSuccess: false,
+            error: "Invalid password"
+        });
+    })
+
+    test.only('should return error if user already exists', async () => {
 
         const input: User = {
-            id: crypto.randomUUID(),
             name: 'User User',
-            email: 'rony@rony.com',
-            password: 'password123',
-            role: 'USER',
+            email: 'ronaldo@ronaldo.com',
+            password: 'password123'
         };
 
         const userService = MokedUserService();
         const passwordService = MokedPasswordService();
 
-        await registerUser({ dependencies: { userService, passwordService }, payload: input });
+        await registerUser({ dependencies: dependencies, payload: input });
 
         const result = await registerUser({ dependencies: { userService, passwordService }, payload: input });
 
@@ -77,35 +139,5 @@ describe('RegisterUser', async () => {
             error: "Email already registered"
         });
     })
-
-    test('should hash password before saving', async () => {
-
-        const input: User = {
-            name: 'Alvaro Almiron',
-            email: 'alvaro@alvaro.com',
-            password: 'password123',
-            role: 'USER'
-        };
-
-        const result = await registerUser(
-            {
-                dependencies: { userService, passwordService },
-                payload: input
-            });
-
-        expect(result.isSuccess).toBe(true);
-        expect(result.isSuccess && result).toEqual({
-            isSuccess: true,
-            data: {
-                id: expect.any(String),
-                name: input.name,
-                email: input.email,
-                role: input.role,
-                createdAt: expect.any(Date),
-                updatedAt: expect.any(Date)
-            }
-        });
-
-    });
-
+    
 })
