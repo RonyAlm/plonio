@@ -1,73 +1,70 @@
-import { User } from "../../entities/user.js"
-import { PasswordService, TokenService, UserService } from "../../services/user-service.js"
+import { User, UserSecure } from "../../entities/user.js"
+import { PasswordService } from "../../services/password-service.js"
+import { UserService } from "../../services/user-service.js"
+import { isValidEmail, isValidName, isValidPassword } from "../../utils/validations.js"
 
 interface UpdateUserProfileParams {
     dependencies: {
         userService: UserService
         passwordService: PasswordService
-        tokenService: TokenService
     }
     payload: {
-        token: string
-        idUser: string
+        userId: string
         input: Partial<User>
     }
 }
 
-type UserSecure = Omit<User, "password">
-
-type UpdateUserProfileResult = Promise<{ isSuccess: boolean, user?: UserSecure, error?: string }>
+type UpdateUserProfileResult = Promise<{ isSuccess: boolean, data?: UserSecure, error?: string }>
 
 export async function updateUserProfile({ dependencies, payload }: UpdateUserProfileParams): UpdateUserProfileResult {
 
-    const existingUser = await dependencies.userService.findById(payload.idUser);
+    const { passwordService, userService } = dependencies;
+    const { input, userId } = payload;
+
+    if (!userId) {
+        return { isSuccess: false, error: "Missing credentials" };
+    }
+
+    const existingUser = await userService.findById(userId);
 
     if (!existingUser) {
-        return { isSuccess: false, error: "User not found" };
+        return { isSuccess: false, error: "Missing credentials" };
+    }
+    
+    let newName = existingUser.name;
+    let newPassword = existingUser.password;
+    let newEmail = existingUser.email;
+
+    if (input.name && !isValidName(input.name)) return { isSuccess: false, error: "Invalid name" };
+    if (input.name) newName = input.name;
+    
+    if(input.password && !isValidPassword(input.password)) return { isSuccess: false, error: "Invalid password" };
+    if(input.password) newPassword = await passwordService.hash(input.password);
+
+    if (input.email && !isValidEmail(input.email)) return { isSuccess: false, error: "Invalid email" };
+    if (input.email) {
+        const existingEmail = await userService.findByEmail(input.email);
+        if (existingEmail) return { isSuccess: false, error: "Email already exists" };
+        newEmail = input.email;
     }
 
-    const userToken = await dependencies.tokenService.verifyAccessToken(payload.token);
-    if (!userToken) return { isSuccess: false, error: "Invalid token" };
+    if(input.role) return { isSuccess: false, error: "Role cannot be updated" };
 
-    let password = existingUser.password;
-    let email = existingUser.email;
-
-    if (payload.input.password) {
-        const hashedPassword = await dependencies.passwordService.hash(payload.input.password);
-        password = hashedPassword;
-    }
-
-    if (payload.input.email ) {
-        const existingEmail = await dependencies.userService.findByEmail(payload.input.email);
-
-        if (existingEmail) {
-            return { isSuccess: false, error: "Email already exists" };
-        }
-
-        email = payload.input.email;
-    }
-
-    const userUpdated = {
+    const newUser = {
         ...existingUser,
-        ...payload.input,
-        email,
-        password
+        ...input,
+        password: newPassword,
+        email: newEmail
     }
 
-    const user = await dependencies.userService.update(userUpdated);
+    const userUpdated = await dependencies.userService.update(newUser);
 
-    if (!user) {
-        return { isSuccess: false, error: "Error updating user" };
-    }
-
+    if (!userUpdated) return { isSuccess: false, error: "Error updating user" };
+    
     const userResponse: UserSecure = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role || "USER",
-        createdAt: user.createdAt || new Date(),
-        updatedAt: user.updatedAt || new Date()
+        ...userUpdated,
+        updatedAt: new Date()
     };
 
-    return { isSuccess: true, user: userResponse };
+    return { isSuccess: true, data: userResponse };
 }
