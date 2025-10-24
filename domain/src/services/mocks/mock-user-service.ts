@@ -67,8 +67,8 @@ export function MokedUserService(): UserService {
             users[index] = userData;
             return userData;
         },
-        async updateRole(idUser, role = "USER") {
-            const index = users.findIndex((user) => user.id === idUser);
+        async updateRole(userId, role = "USER") {
+            const index = users.findIndex((user) => user.id === userId);
             const user = users[index];
             if (!user) return null;
             user.role = role;

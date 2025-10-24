@@ -29,6 +29,7 @@ export async function revokeRole({ dependencies, payload }: RevokeRoleParams): R
     if (!targetUser) return { isSuccess: false, error: "Target user not found" };
 
     const updated = await userService.updateRole(targetUserId, 'USER');
+    if (!updated) return { isSuccess: false, error: "Error revoking role" };
 
     const updatedUser = {
         id: updated.id as string,

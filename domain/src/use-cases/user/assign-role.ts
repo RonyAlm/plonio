@@ -35,6 +35,7 @@ export async function assignRole({ dependencies, payload }: AssignRoleParams): A
     if(targetUser.id === adminId) return { isSuccess: false, error: "You cannot change your own role" };
     
     const updated = await userService.updateRole(targetUserId, role);
+    if (!updated) return { isSuccess: false, error: "Error assigning role" };
 
      const updatedUser = {
         id: updated.id as string,

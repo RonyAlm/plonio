@@ -6,5 +6,5 @@ export interface UserService {
     findById: (id: string) => Promise<User | null>
     findByEmail: (email: string) => Promise<User | null>
     update: ( user: User) => Promise<User | null>
-    updateRole: ( idUser: string, role: UserRole) => Promise<UserSecure | null>
+    updateRole: ( userId: string, role: UserRole) => Promise<UserSecure | null>
 }
