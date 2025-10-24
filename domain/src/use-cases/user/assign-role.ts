@@ -1,4 +1,4 @@
-import { User, UserRole, UserSecure } from "../../entities/user.js"
+import { UserRole, UserSecure } from "../../entities/user.js"
 import { UserService } from "../../services/user-service.js"
 
 export interface AssignRoleParams {
@@ -6,9 +6,9 @@ export interface AssignRoleParams {
         userService: UserService
     }
     payload: {
-        idUserOwner: string,
-        idUser: string
-        role: UserRole
+        adminId: string;
+        targetUserId: string;
+        role: UserRole;
     }
 }
 
@@ -17,19 +17,31 @@ type AssignRoleResult = Promise<{ isSuccess: boolean, data?: Partial<UserSecure>
 export async function assignRole({ dependencies, payload }: AssignRoleParams): AssignRoleResult {
 
     const { userService } = dependencies;
-    const { idUser, role, idUserOwner } = payload;
+    const { adminId, targetUserId, role } = payload;
 
-    const rolUserOwner = await userService.findById(idUserOwner.trim());
-    if (!rolUserOwner) return { isSuccess: false, error: "User owner id is required" };
+    const adminUser = await userService.findById(adminId.trim());
+    if (!adminUser) return { isSuccess: false, error: "Missing credentials" };
 
-    if (rolUserOwner.role !== 'ADMIN' && rolUserOwner.role !== 'MANAGER') {
+    if (adminUser.role !== 'ADMIN' && adminUser.role !== 'MANAGER') {
         return { isSuccess: false, error: "Only admin and manager can assign roles" };
     }
 
-    const user = await userService.findById(idUser);
-    if (!user) return { isSuccess: false, error: "User not found" };
+    if(role !== 'USER' && role !== 'ADMIN' && role !== 'MANAGER' && role !== 'EDITOR' && role !== 'VIEWER') {
+        return { isSuccess: false, error: "Role is required" };
+    }
 
-    const updated = await userService.updateRole(idUser, role);
-    if (!updated) return { isSuccess: false, error: "User not found after role update" };
-    return { isSuccess: true, data: updated };
+    const targetUser = await userService.findById(targetUserId);
+    if (!targetUser) return { isSuccess: false, error: "Target user not found" };
+    if(targetUser.id === adminId) return { isSuccess: false, error: "You cannot change your own role" };
+    
+    const updated = await userService.updateRole(targetUserId, role);
+
+     const updatedUser = {
+        id: updated.id as string,
+        name: updated.name,
+        email: updated.email,
+        role: updated.role as UserRole
+    }
+
+    return { isSuccess: true, data: updatedUser };
 }
