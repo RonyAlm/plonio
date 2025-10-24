@@ -58,6 +58,9 @@ export function MokedUserService(): UserService {
         async findByEmail(email) {
             return users.find((user) => user.email === email) || null;
         },
+        async getAll() {
+            return users.map(({ ...rest }) => rest);
+        },
         async update(userData) {
             const index = users.findIndex((user) => user.id === userData.id);
             if (index === -1) return null;
