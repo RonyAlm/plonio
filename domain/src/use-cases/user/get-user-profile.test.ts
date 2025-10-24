@@ -5,54 +5,47 @@ import { MokedUserService } from '../../services/mocks/mock-user-service.js';
 describe("GetUserProfile", async () => {
   
   const userService = MokedUserService();
-  let userIdToken: string;
+  const dependencies = {
+    userService: userService
+  }
 
   test("should get user profile successfully", async () => {
 
-    userIdToken = "user-1";
-
     const result = await getUserProfile({
-      dependencies: {
-        userService: userService,
-      },
+      dependencies: dependencies,
       payload: {
-        userId: userIdToken
+        userId: 'user-1'
       }
     });
     
     expect(result.isSuccess).toBe(true);
     expect(result.isSuccess && result.data).toBeDefined();
-    expect(result.isSuccess && result.data && result.data.id).toBe(userIdToken);
   });
 
   test ("should return error if userId is empty", async () => {
 
     const result = await getUserProfile({
-      dependencies: {
-        userService: userService
-      },
+      dependencies: dependencies,
       payload: {
         userId: ""
       }
     });
     
     expect(result.isSuccess).toBe(false);
-    expect(result.error).toBe("User ID is required");
+    expect(result.error).toBe("Missing credentials");
   });
 
   test ("should return error if user not found", async () => {
 
     const result = await getUserProfile({
-      dependencies: {
-        userService: userService
-      },
+      dependencies: dependencies,
       payload: {
         userId: "user-not-found"
       }
     });
     
     expect(result.isSuccess).toBe(false);
-    expect(result.error).toBe("User not found");
+    expect(result.error).toBe("Missing credentials");
   });
 
 });

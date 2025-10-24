@@ -17,14 +17,14 @@ export async function getUserProfile({ dependencies, payload }: GetUserProfilePa
     const { userId } = payload;
     const { userService } = dependencies;
 
-    if (!userId) return { isSuccess: false, error: "User ID is required" };
+    if (!userId) return { isSuccess: false, error: "Missing credentials" };
 
     const user = await userService.findById(userId);
 
-    if (!user) return { isSuccess: false, error: "User not found" };
+    if (!user) return { isSuccess: false, error: "Missing credentials" };
 
     const userResponse: UserSecure = {
-        id: userId,
+        id: user.id || userId,
         name: user.name,
         email: user.email,
         role: user.role || "USER",
@@ -34,6 +34,8 @@ export async function getUserProfile({ dependencies, payload }: GetUserProfilePa
 
     return {
         isSuccess: true,
-        data: userResponse
+        data: {
+            ...userResponse
+        }
     };
 }
