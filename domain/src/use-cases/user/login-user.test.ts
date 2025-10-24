@@ -47,7 +47,7 @@ describe("LoginUser", async () => {
     test("should return error credentials if email or password is invalid", async () => {
         const input = {
             email: "ema@ema.com",
-            password: "ema"
+            password: "emae433"
         }
 
         const result = await loginUser({
@@ -56,7 +56,7 @@ describe("LoginUser", async () => {
         });
 
         expect(result.isSuccess).toBe(false);
-        expect(result.error).toBe("Invalid password");
+        expect(result.error).toBe("Invalid credentials");
     });
 
     test("should return error if email or password is empty", async () => {
@@ -71,7 +71,7 @@ describe("LoginUser", async () => {
         });
 
         expect(result.isSuccess).toBe(false);
-        expect(result.error).toBe("Missing credentials");
+        expect(result.error).toBe("Credentials are required");
     });
 
 });

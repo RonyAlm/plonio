@@ -2,6 +2,7 @@ import { User, UserSecure } from "../../entities/user.js";
 import { UserService } from "../../services/user-service.js";
 import { PasswordService } from "../../services/password-service.js";
 import { AuthService } from "../../services/auth-service.js";
+import { isValidEmail } from "../../utils/validations.js";
 
 export interface LoginUserParams {
     dependencies: {
@@ -19,21 +20,17 @@ export async function loginUser({ dependencies, payload }: LoginUserParams): Log
     const { userService, passwordService, authService } = dependencies;
 
     if (!payload.email || !payload.password) {
-        return { isSuccess: false, error: "Missing credentials" };
+        return { isSuccess: false, error: "Credentials are required" };
     }
 
-    if (!payload.email.includes("@")) {
-        return { isSuccess: false, error: "Invalid email" };
-    }
+    if (!isValidEmail(payload.email)) return { isSuccess: false, error: "Invalid email" };
 
     const user = await userService.findByEmail(payload.email);
 
-    if (!user || !user.id) {
-        return { isSuccess: false, error: "User not found" };
-    }
+    if (!user || !user.id) return { isSuccess: false, error: "User not found" };
 
     const isValid = await passwordService.compare(payload.password, user.password);
-    if (!isValid) return { isSuccess: false, error: "Invalid password" };
+    if (!isValid) return { isSuccess: false, error: "Invalid credentials" };
 
     const tokens = await authService.generateTokens(user.id);
     return { isSuccess: true, data: { user, ...tokens } };
