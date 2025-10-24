@@ -1,34 +1,38 @@
 import { User } from "../../entities/user.js";
-import {  UserService } from "../../services/user-service.js";
+import { UserService } from "../../services/user-service.js";
 
 export interface GetUserParams {
     dependencies: {
         userService: UserService,
     }
     payload: {
-        idUser: string
+        id?: string
     };
 }
 
-type UserSecure = Omit<User, "password">
+type UserPublic = Omit<User, "password" | "createdAt" | "updatedAt">
 
-export type GetUserResult = Promise<{ isSuccess: boolean, error?: string, user?: UserSecure }>;
+export type GetUserResult = Promise<{ isSuccess: boolean, error?: string, data?: UserPublic | UserPublic[] }>;
 
 export async function getUser({ dependencies, payload }: GetUserParams): GetUserResult {
 
-    const user = await dependencies.userService.findById(payload.idUser);
+    const { userService } = dependencies;
 
-    if (!user) return { isSuccess: false, error: "User not found" };
+    let result: UserPublic[] | UserPublic = [];
 
-    const userResponse: UserSecure = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role || "USER",
+    if (!payload.id) {
+        const users = await userService.getAll();
+        result = users.map(({...rest }) => rest);
+        return { isSuccess: true, data: result };
     };
 
-    return {
-        isSuccess: true,
-        user: userResponse
+    if (payload.id) {
+        const user = await userService.findById(payload.id);
+        if (!user) return { isSuccess: false, error: "User not found" };
+        const {...publicUser } = user;
+        result = publicUser;
+        return { isSuccess: true, data: result };
     };
+
+    return { isSuccess: true, data: result };
 }

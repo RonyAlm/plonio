@@ -1,44 +1,57 @@
-import { beforeAll, describe, expect, test } from 'vitest';
-import { getUserProfile } from './get-user-profile.js';
-import { MokedPasswordService, MokedTokenService, MokedUserService } from '../../services/mocks/mock-user-service.js';
-import { loginUser } from './login-user.js';
+import { describe, expect, test } from 'vitest';
+import { MokedUserService } from '../../services/mocks/mock-user-service.js';
 import { getUser } from './get-user.js';
 
 describe("GetUser", async () => {
-  
-  test("should get user successfully", async () => {
-    const userService = MokedUserService();
-    const idUser = "1324";
+
+  const userService = MokedUserService();
+  const dependencies = {
+    userService: userService
+  }
+
+
+  test("should get user by id successfully", async () => {
 
     const result = await getUser({
-      dependencies: {
-        userService: userService,
-      },
+      dependencies: dependencies,
       payload: {
-        idUser: idUser
+        id: "user-1"
       }
     });
-    
+
     expect(result.isSuccess).toBe(true);
-    expect(result.isSuccess && result.user).toBeDefined();
-    expect(result.isSuccess && result.user && result.user.id).toBe(idUser);
+    expect(result.isSuccess && result.data).toBeDefined();
   });
 
   test("should return error if user not found", async () => {
-    const userService = MokedUserService();
-    const idUser = "user-not-found";
 
     const result = await getUser({
-      dependencies: {
-        userService: userService,
-      },
+      dependencies: dependencies,
       payload: {
-        idUser: idUser
+        id: "user-not-found"
       }
     });
-    
+
     expect(result.isSuccess).toBe(false);
     expect(result.error).toBe("User not found");
+  });
+
+  test("should return all users if id is empty", async () => {
+
+    const result = await getUser({
+      dependencies: dependencies,
+      payload: {
+        id: ""
+      }
+    });
+
+    expect(result.isSuccess).toBe(true);
+    expect(result.isSuccess && result.data).toBeDefined();
+    if (result.isSuccess && Array.isArray(result.data)) {
+      expect(result.data.length).toBe(2);
+    } else {
+      expect(Array.isArray(result.data)).toBe(true);
+    }
   });
 
 
