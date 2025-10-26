@@ -1,11 +1,14 @@
 import express from "express";
-import userRouter from './routes/users.js';
+import usersRouter from "./routes/users.route.js";
+import { unknownEndpoint } from "./utils/middleware.js";
+
 
 const app = express();
-const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.use('/api/user', userRouter)
+app.use('/api', usersRouter)
+
+app.use(unknownEndpoint);
 
 export default app; 
