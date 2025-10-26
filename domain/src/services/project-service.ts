@@ -1,4 +1,4 @@
-import { Project } from "../entities/Project.js";
+import { Project } from "../entities/project.js";
 
 export interface ProjectService {
     findByUserId: (id: string) => Promise<Project[] | undefined>

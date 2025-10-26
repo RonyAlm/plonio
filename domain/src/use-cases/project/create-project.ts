@@ -1,11 +1,13 @@
-import { Project } from "../../entities/Project.js"
+import { Project } from "../../entities/project.js"
 import { ProjectService } from "../../services/project-service.js"
+import { isValidName } from "../../utils/validations.js"
 
 interface CreateProjectParams {
     dependencies: {
         projectService: ProjectService
     }
     payload: {
+        userId: string,
         project: Project
     }
 }
@@ -13,25 +15,29 @@ interface CreateProjectParams {
 type CreateProjectResult = Promise<{ isSuccess: boolean, project?: Project, error?: string}>
 
 export async function createProject({ dependencies, payload } : CreateProjectParams ) : CreateProjectResult {
+    const { projectService } = dependencies;
+    const { userId, project } = payload;
 
+    if (!userId) return { isSuccess: false, error: "Missing credentials" };
+    if (project.ownerId) return { isSuccess: false, error: "Cannot add ownerId to project" };
     
-    if (payload.project.name === "") return { isSuccess: false, error: "Project name is required" };
+    if (!isValidName(project.name)) return { isSuccess: false, error: "Invalid project name" };
     
-    const existingProject = await dependencies.projectService.findByName(payload.project.name);
+    const existingProject = await projectService.findByName(project.name);
     if (existingProject) return { isSuccess: false, error: "Project name already exists" };
-
-    const project = await dependencies.projectService.save(payload.project);
-    if (!project) return { isSuccess: false, error: "Error creating project" };
     
-    const projectResponse: Project = {
+    
+    const projectData: Project = {
         id: project.id || crypto.randomUUID(),
         name: project.name,
         description: project.description ?? "",
-        ownerId: project.ownerId,
+        ownerId: userId,
         members: [],
         createdAt:  new Date(),
         updatedAt: new Date()
     }
-
-    return { isSuccess: true, project: projectResponse }; 
+    const projectSaved = await projectService.save(projectData);
+    if (!projectSaved) return { isSuccess: false, error: "Error creating project" };
+    
+    return { isSuccess: true, project: projectSaved }; 
 }

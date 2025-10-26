@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, beforeAll } from "vitest";
 import { createProject } from "./create-project.js";
 import { MokedProjectService } from "../../services/mocks/mock-project-service.js";
 
@@ -6,22 +6,33 @@ import { MokedProjectService } from "../../services/mocks/mock-project-service.j
 describe("CreateProject", async () => {
 
     const projectService = MokedProjectService();
+    const dependencies = { projectService };
 
-    test("should create a project", async () => {
+    beforeAll(() => {
         const newProject = {
-            id: "2",
-            name: "Project 2",
-            description: "Description 2",
-            ownerId: "1",
+            id: "primer-proyecto-id",
+            name: "Projecto de prueba",
+            description: "Description 1",
+            ownerId: "admin-2",
             members: [],
             createdAt: new Date(),
             updatedAt: new Date()
         }
 
+        projectService.save(newProject);
+
+    });
+
+    test("should create a project success", async () => {
+        const newProject = {
+            name: "Otro proyecto",
+            description: "Description 2"
+        }
+
         const result = await createProject(
             {
-                dependencies: { projectService },
-                payload: { project: newProject }
+                dependencies: dependencies,
+                payload: { userId: "admin-2", project: newProject }
             }
         );
 
@@ -29,21 +40,52 @@ describe("CreateProject", async () => {
         expect(result.project).toBeDefined();
     });
 
-    test("should return error if existing project name", async () => {
+    test("should return error id userId is empty or not found", async () => {
         const newProject = {
-            id: "1",
-            name: "Project 1",
-            description: "Description 1",
-            ownerId: "1",
-            members: [],
-            createdAt: new Date(),
-            updatedAt: new Date()
+            name: "Project 2",
+            description: "Description 2"
         }
 
         const result = await createProject(
             {
-                dependencies: { projectService },
-                payload: { project: newProject }
+                dependencies: dependencies,
+                payload: { userId: "", project: newProject }
+            }
+        );
+
+        expect(result.isSuccess).toBe(false);
+        expect(result.error).toBe("Missing credentials");
+    });
+
+    test("should return error if project name is invalid", async () => {
+        const newProject = {
+            name: "",
+            description: "Description 2"
+        }
+
+        const result = await createProject(
+            {
+                dependencies: dependencies,
+                payload: { userId: "admin-2", project: newProject }
+            }
+        );
+
+        expect(result.isSuccess).toBe(false);
+        expect(result.error).toBe(
+            "Invalid project name"
+        )
+    });
+
+    test("should return error if existing project name", async () => {
+        const newProject = {
+            name: "Projecto de prueba",
+            description: "Description 1"
+        }
+
+        const result = await createProject(
+            {
+                dependencies: dependencies,
+                payload: { userId: "admin-2", project: newProject }
             }
         );
 
@@ -51,26 +93,24 @@ describe("CreateProject", async () => {
         expect(result.error).toBe("Project name already exists");
     });
 
-    test("should return error if project name is empty", async () => {
+    test("should return error if attempt to add ownerId to project", async () => {
         const newProject = {
-            id: "1",
-            name: "",
+            name: "Projecto de prueba",
             description: "Description 1",
-            ownerId: "1",
-            members: [],
-            createdAt: new Date(),
-            updatedAt: new Date()
+            ownerId: "admin-1"
         }
 
         const result = await createProject(
             {
-                dependencies: { projectService },
-                payload: { project: newProject }
+                dependencies: dependencies,
+                payload: { userId: "admin-2", project: newProject }
             }
         );
 
         expect(result.isSuccess).toBe(false);
-        expect(result.error).toBe("Project name is required");
-    });
+        expect(result.error).toBe(
+            "Cannot add ownerId to project"
+        )
+    })
 
 });

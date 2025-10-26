@@ -1,13 +1,13 @@
-import { Member } from "./Member.js"
+import { Member } from "./member.js"
 
 export interface Project {
-    id: string
+    id?: string
     name: string
     description?: string
-    ownerId: string //(User.id)
-    members: Member[]
-    createdAt: Date
-    updatedAt: Date
+    ownerId?: string
+    members?: Member[]
+    createdAt?: Date
+    updatedAt?: Date
 }
 
 
