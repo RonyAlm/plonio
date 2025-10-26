@@ -1,5 +1,5 @@
 import { DataSource } from "typeorm";
-import UserEntity from "../entities/user.entity.js";
+import UserEntity from "../models/typeorm/user.entity.js";
 import path from "path";
 
 export default async function createDb(dbFile = "./data/typeorm.db") {

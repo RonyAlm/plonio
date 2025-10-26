@@ -2,7 +2,7 @@
 import bcrypt from 'bcrypt'
 import { PasswordService} from '../../../../domain/dist/index.js'
 
-export class PasswordServiceImplementation implements PasswordService {
+export class PasswordServiceBcrypt implements PasswordService {
     constructor() { }
 
     async hash(password: string): Promise<string> {

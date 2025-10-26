@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm'
 
-import UserEntity from '../entities/user.entity.js'
-import { User, UserRole, UserService } from '../../../../domain/dist/index.js'
+import UserEntity from '../models/typeorm/user.entity.js'
+import { User, UserRole, UserSecure, UserService } from '../../../../domain/dist/index.js'
 
-export class UserServiceImplementationTypeorm implements UserService {
+export class UserServiceTypeorm implements UserService {
 
     constructor(
         private readonly dataSource: DataSource
@@ -21,6 +21,11 @@ export class UserServiceImplementationTypeorm implements UserService {
         const repo = this.dataSource.getRepository<any>(UserEntity as any);
 
         return await repo.findOne({ where: { id: id   } });
+    }
+
+    async getAll(): Promise<UserSecure[]> {
+        const repo = this.dataSource.getRepository<any>(UserEntity as any);
+        return await repo.find();
     }
 
     async save(user: User): Promise<User> {
