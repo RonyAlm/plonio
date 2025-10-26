@@ -27,7 +27,7 @@ export async function assignRole({ dependencies, payload }: AssignRoleParams): A
     }
 
     if(role !== 'USER' && role !== 'ADMIN' && role !== 'MANAGER' && role !== 'EDITOR' && role !== 'VIEWER') {
-        return { isSuccess: false, error: "Role is required" };
+        return { isSuccess: false, error: "Role is required or not exists" };
     }
 
     const targetUser = await userService.findById(targetUserId);

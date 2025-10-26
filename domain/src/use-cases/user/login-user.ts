@@ -1,4 +1,4 @@
-import { User, UserSecure } from "../../entities/user.js";
+import { User, UserRole, UserSecure } from "../../entities/user.js";
 import { UserService } from "../../services/user-service.js";
 import { PasswordService } from "../../services/password-service.js";
 import { AuthService } from "../../services/auth-service.js";
@@ -33,6 +33,14 @@ export async function loginUser({ dependencies, payload }: LoginUserParams): Log
     if (!isValid) return { isSuccess: false, error: "Invalid credentials" };
 
     const tokens = await authService.generateTokens(user.id);
-    return { isSuccess: true, data: { user, ...tokens } };
+    return { isSuccess: true, data: { 
+        user: {
+            id: user.id as string,
+            name: user.name,
+            email: user.email,
+            role: user.role as UserRole
+        },
+        ...tokens
+    } };
 
 }

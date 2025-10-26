@@ -67,7 +67,7 @@ describe("AssignRole", async () => {
         });
 
         expect(result.isSuccess).toBe(false);
-        expect(result.error).toBe("Role is required");
+        expect(result.error).toBe("Role is required or not exists");
     });
 
     test("should return error if a user tries to change their own role (promote or demote)", async () => {

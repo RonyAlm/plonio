@@ -2,3 +2,5 @@ node_modules
 dist
 request
 data
+.env
+.env.local

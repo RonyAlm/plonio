@@ -1,4 +1,4 @@
-import { User, UserSecure } from "../../entities/user.js"
+import { User, UserRole, UserSecure } from "../../entities/user.js"
 import { PasswordService } from "../../services/password-service.js"
 import { UserService } from "../../services/user-service.js"
 import { isValidEmail, isValidName, isValidPassword } from "../../utils/validations.js"
@@ -62,7 +62,11 @@ export async function updateUserProfile({ dependencies, payload }: UpdateUserPro
     if (!userUpdated) return { isSuccess: false, error: "Error updating user" };
     
     const userResponse: UserSecure = {
-        ...userUpdated,
+        id: userUpdated.id || userId,
+        name: userUpdated.name,
+        email: userUpdated.email,
+        role: userUpdated.role as UserRole,
+        createdAt: userUpdated.createdAt as Date,
         updatedAt: new Date()
     };
 

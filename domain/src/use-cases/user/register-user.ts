@@ -1,4 +1,4 @@
-import { User, UserSecure } from "../../entities/user.js";
+import { User, UserRole, UserSecure } from "../../entities/user.js";
 import { PasswordService } from "../../services/password-service.js";
 import { UserService } from "../../services/user-service.js";
 import { isValidEmail, isValidName, isValidPassword } from "../../utils/validations.js";
@@ -21,9 +21,9 @@ export async function registerUser({ dependencies, payload }: RegisterUserParams
 
     if (!payload.email || !payload.password) return { isSuccess: false, error: "Email and password are required" };
 
-    if(!isValidName(payload.name)) return { isSuccess: false, error: "Invalid name" };
-    if(!isValidEmail(payload.email)) return { isSuccess: false, error: "Invalid email" };
-    if(!isValidPassword(payload.password)) return { isSuccess: false, error: "Invalid password" };
+    if (!isValidName(payload.name)) return { isSuccess: false, error: "Invalid name" };
+    if (!isValidEmail(payload.email)) return { isSuccess: false, error: "Invalid email" };
+    if (!isValidPassword(payload.password)) return { isSuccess: false, error: "Invalid password" };
 
 
     const existing = await userService.findByEmail(payload.email);
@@ -32,8 +32,8 @@ export async function registerUser({ dependencies, payload }: RegisterUserParams
     const hashedPassword = await passwordService.hash(payload.password);
     const newUser: User = {
         id: crypto.randomUUID(),
-        name : payload.name,
-        email : payload.email,
+        name: payload.name,
+        email: payload.email,
         password: hashedPassword,
         role: "USER",
         createdAt: new Date(),
@@ -41,6 +41,15 @@ export async function registerUser({ dependencies, payload }: RegisterUserParams
     };
 
     const savedUser = await userService.save(newUser);
-    return { isSuccess: true, data: savedUser };
-
+    return {
+        isSuccess: true,
+        data: {
+            id: savedUser.id as string,
+            name: savedUser.name,
+            email: savedUser.email,
+            role: savedUser.role as UserRole,
+            createdAt: savedUser.createdAt as Date,
+            updatedAt: savedUser.updatedAt as Date
+        }
+    };
 }

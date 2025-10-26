@@ -1,4 +1,4 @@
-import { UserSecure } from "../../entities/user.js";
+import { UserRole, UserSecure } from "../../entities/user.js";
 import { UserService } from "../../services/user-service.js";
 
 export interface GetUserProfileParams {
@@ -27,9 +27,9 @@ export async function getUserProfile({ dependencies, payload }: GetUserProfilePa
         id: user.id || userId,
         name: user.name,
         email: user.email,
-        role: user.role || "USER",
-        createdAt: user.createdAt || new Date(),
-        updatedAt: user.updatedAt || new Date()
+        role: user.role as UserRole,
+        createdAt: user.createdAt as Date,
+        updatedAt: user.updatedAt as Date
     };
 
     return {
