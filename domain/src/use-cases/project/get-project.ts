@@ -1,4 +1,4 @@
-import { Project } from "../../entities/Project.js"
+import { Project } from "../../entities/project.js"
 import { ProjectService } from "../../services/project-service.js"
 
 export interface GetProjectParams {
@@ -6,26 +6,33 @@ export interface GetProjectParams {
         projectService: ProjectService
     },
     payload: {
-        id: string
+        projectId: string;
+        userId: string;
     }
 }
 
-type GetProjectResult = Promise<{ isSuccess: boolean, project?: Partial<Project>, error?: string}>
+type GetProjectResult = Promise<{ isSuccess: boolean, project?: Partial<Project>, error?: string }>
 
-export async function getProject({ dependencies, payload } : GetProjectParams) : GetProjectResult {
+export async function getProject({ dependencies, payload }: GetProjectParams): GetProjectResult {
 
-   if (payload.id === "") {
-       return { isSuccess: false, error: "Project id is required" };
-   }
+    const { projectService } = dependencies;
+    const { projectId, userId } = payload;
 
-   const project = await dependencies.projectService.findById(payload.id)
+    if (!userId) return { isSuccess: false, error: "Missing credentials" };
 
-   if (!project) {
-       return { isSuccess: false, error: "Project not found" };
-   }
+    if (!projectId) return { isSuccess: false, error: "Project id is required" };
 
-   return {
-       isSuccess: true,
-       project
-   }
+    const project = await projectService.findById(projectId);
+    if (!project) return { isSuccess: false, error: "Project not found" };
+
+    const isMember = project?.members && project.members.length > 0 && project.members.find((member) => member.userId === userId);
+    
+    const IsMemberOrOwner = isMember || project.ownerId === userId;
+
+    if (!IsMemberOrOwner) return { isSuccess: false, error: "Not member or owner of project" };
+
+    return {
+        isSuccess: true,
+        project
+    }
 }

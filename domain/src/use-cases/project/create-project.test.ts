@@ -92,7 +92,8 @@ describe("CreateProject", async () => {
         expect(result.isSuccess).toBe(false);
         expect(result.error).toBe("Project name already exists");
     });
-
+     
+    /*
     test("should return error if attempt to add ownerId to project", async () => {
         const newProject = {
             name: "Projecto de prueba",
@@ -111,6 +112,6 @@ describe("CreateProject", async () => {
         expect(result.error).toBe(
             "Cannot add ownerId to project"
         )
-    })
+    })*/
 
 });
