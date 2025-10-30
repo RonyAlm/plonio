@@ -25,8 +25,6 @@ export function MokedUserService(): UserService {
         createdAt: new Date(),
         updatedAt: new Date()
     }
-
-
     ];
 
     return {
