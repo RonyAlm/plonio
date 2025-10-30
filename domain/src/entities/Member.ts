@@ -1,6 +1,9 @@
 export const MemberRole = {
-    VIEWER: 'viewer',
-    EDITOR: 'editor'
+    VIEWER: 'VIEWER',
+    EDITOR: 'EDITOR',
+    ADMIN: 'ADMIN', 
+    MANAGER: 'MANAGER',
+    USER: 'USER'
 } as const
 
 export type MemberRole = typeof MemberRole[keyof typeof MemberRole]
