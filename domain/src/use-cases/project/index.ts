@@ -1,2 +1,7 @@
 export * from './create-project.js'
 export * from './get-project.js'
+export * from './update-project.js'
+export * from './delete-project.js'
+export * from './list-projects-by-user.js'
+export * from './invite-user-to-project.js'
+export * from './respond-to-invitation.js'
