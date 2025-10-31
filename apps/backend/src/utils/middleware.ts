@@ -27,13 +27,16 @@ export const unknownEndpoint = (req: Request, res: Response) => {
 }
 
 export const errorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
-    console.error(error.message)
+    console.error(error.message, "Name error: ", error.name)
     if (error.message === 'User not found') {
         return res.status(400).send({ isSuccess: false, error: 'Usuario no encontrado' })
     } else if (error.message === 'Missing Credentials') {
         return res.status(400).send({ isSuccess: false, error: 'Usuario o contraseña incorrectos' })
     } else if (error.message === 'Invalid Credentials') {
         return res.status(400).send({ isSuccess: false, error: 'Usuario o contraseña incorrectos' })
+    }
+    else if (error.message === "Cannot destructure property 'userId' of '(intermediate value)' as it is null.") {
+        return res.status(401).send({ isSuccess: false, error: 'Token inválido' })
     } else if (error.message === 'Project not found') {
         return res.status(400).send({ isSuccess: false, error: 'Proyecto no encontrado' })
     } else {
