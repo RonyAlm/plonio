@@ -1,5 +1,5 @@
 import app from './app.js'
-import { AppDataSource } from './utils/conexion.js';
+import { AppDataSource } from './utils/conexionDB.js';
 import config from './utils/config.js'
 import "reflect-metadata";
 
