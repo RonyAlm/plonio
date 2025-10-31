@@ -1,0 +1,77 @@
+@baseUrl = http://localhost:3000/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhM2RhZjQ5Yy1mNzYxLTQ1OTAtODVmZS0zODRhMjljOGFhZmYiLCJpYXQiOjE3NjE5MTEwNTAsImV4cCI6MTc2MzEyMDY1MH0.0Pw2ClRp0BXX-xk3TQTqvmmbe2DnuNrpV4D_PeXbcCU
+
+
+### GetUser All
+##GET {{baseUrl}}/users
+
+### POST - CreateUser - 1
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "name": "Fabian Benitez",
+  "email": "fabi@gmail.com",
+  "password": "12345678"
+}
+
+### POST - CreateUser - User 2
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "name": "Ema Paz",
+  "email": "ema@ema.com",
+  "password": "ema12345678",
+  "role": "ADMIN"
+}
+
+### POST - CreateUser - User 3
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "name": "Carlo Gomez",
+  "email": "gomez@gmail.com",
+  "password": "g412345678"
+}
+
+### LoginUser 
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "rony@gmail.com",
+  "password": "rony12345678"
+}
+
+### GetProfile
+GET {{baseUrl}}/me
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### UpdateProfile
+PUT {{baseUrl}}/me
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Rony Almiron"
+}
+
+### GetUser
+GET {{baseUrl}}/user/a3daf49c-f761-4590-85fe-384a29c8aaff
+
+### AssignRole
+PUT {{baseUrl}}/user/26c1685b-43eb-48e2-aecb-2fde8cb8a844/role
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "role": "ADMIN"
+}
+
+### RevokeRole
+DELETE {{baseUrl}}/user/26c1685b-43eb-48e2-aecb-2fde8cb8a844/role
+Content-Type: application/json
+Authorization: Bearer {{token}}

@@ -1,0 +1,40 @@
+@baseUrl = http://localhost:3000/api/projects
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhM2RhZjQ5Yy1mNzYxLTQ1OTAtODVmZS0zODRhMjljOGFhZmYiLCJpYXQiOjE3NjE4NTk1MjgsImV4cCI6MTc2MzA2OTEyOH0.elcAzjM4s1kyIXsTHR9ZR-lwfdnH5xeMu175cZBN2PA
+
+
+### ListProjectsByUse
+GET {{baseUrl}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### POST - CreateProject
+POST {{baseUrl}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Proyecto 3",
+  "description": "Este es un proyecto 5"
+}
+
+### GetProjects
+GET {{baseUrl}}/a3e9d416-eaf3-4479-88f1-b6ed2dc01dda
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+### UpdateProject
+PUT {{baseUrl}}/a3e9d416-eaf3-4479-88f1-b6ed2dc01dda
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Plonio app",
+  "description": "Es una una plataforma para gestionar Proyectos"
+}
+
+### GetProjects
+DELETE {{baseUrl}}/a446a992-1bee-4b9f-aef5-6ca3715289e5
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
