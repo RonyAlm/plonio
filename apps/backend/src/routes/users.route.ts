@@ -1,65 +1,30 @@
 import express from 'express'
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 const usersRouter = express.Router()
 import { assignRole, getUser, getUserProfile, loginUser, registerUser, revokeRole, updateUserProfile } from '../../../../domain/dist/index.js';
 import { tokenExtractor, userExtractor } from '../utils/middleware.js';
 import { UserServiceTypeorm } from '../services/user-service-typeorm.js';
 import { PasswordServiceBcrypt } from '../services/password-service-bcrypt.js';
-import createDb from '../utils/createDb.js';
 import { AuthServiceJwt } from '../services/auth-service-jwt.js';
 
-const db = await createDb();
-
-const userService = new UserServiceTypeorm(db);
+const userService = new UserServiceTypeorm();
 const passwordService = new PasswordServiceBcrypt();
 const authService = new AuthServiceJwt();
 
-
-usersRouter.get("/users", async (req: Request, res: Response) => {
-
-  const result = await getUser(
-    {
-      dependencies:
-      {
-        userService
-      },
-      payload: {
-        id: ""
-      }
-    });
-
-  if (result.isSuccess) {
-    res.status(201).json(result);
-  } else {
-    res.status(400).json({ error: result });
-  }
-})
-
-usersRouter.get("/user/:id", async (req: Request, res: Response) => {
+usersRouter.get("/user/:id", async (req: Request, res: Response, next: NextFunction) => {
 
   const { id } = req.params
 
-  if (!id) return res.status(400).json({ isSuccess: false, error: 'user id is required' });
-
-  const result = await getUser(
-    {
-      dependencies:
-      {
-        userService
-      },
-      payload: {
-        id: id
-      }
-    });
-
-  if (result.isSuccess) {
-    res.status(201).json(result);
-  } else {
-    res.status(400).json({ error: result });
+  try {
+    const result = await getUser({ dependencies: { userService }, payload: { id: id as string } });
+    if (result.isSuccess) res.status(201).json(result)
+  } catch (error) {
+    next(error);
   }
+
 })
 
-usersRouter.post("/register", async (req: Request, res: Response) => {
+usersRouter.post("/register", async (req: Request, res: Response, next: NextFunction) => {
 
   const userInput = {
     id: req.body.id || crypto.randomUUID(),
@@ -71,38 +36,24 @@ usersRouter.post("/register", async (req: Request, res: Response) => {
     updatedAt: req.body.updatedAt || new Date()
   }
 
-  const result = await registerUser(
-    {
-      dependencies:
-      {
-        userService, passwordService
-      },
-      payload: userInput
-    });
-
-  if (result.isSuccess) {
-    res.status(201).json(result);
-  } else {
-    res.status(400).json({ error: result });
+  try {
+    const result = await registerUser({ dependencies: { userService, passwordService }, payload: userInput });
+    if (result.isSuccess) res.status(201).json(result);
+  } catch (error) {
+    next(error);
   }
+
 });
 
-usersRouter.post("/login", async (req: Request, res: Response) => {
+usersRouter.post("/login", async (req: Request, res: Response, next: NextFunction) => {
 
-  const dependencies = {
-    userService, passwordService, authService
-  }
+  const dependencies = { userService, passwordService, authService }
 
-  const result = await loginUser(
-    {
-      dependencies: dependencies,
-      payload: req.body
-    });
-
-  if (result.isSuccess) {
-    res.status(201).json(result);
-  } else {
-    res.status(400).json({ error: result });
+  try {
+    const result = await loginUser({ dependencies: dependencies, payload: req.body });
+    if (result.isSuccess) res.status(201).json(result);
+  } catch (error) {
+    next(error);
   }
 
 });
@@ -110,122 +61,75 @@ usersRouter.post("/login", async (req: Request, res: Response) => {
 usersRouter.use(tokenExtractor)
 usersRouter.use(userExtractor)
 
-usersRouter.get("/me", async (req: Request, res: Response) => {
+usersRouter.get("/me", async (req: Request, res: Response, next: NextFunction) => {
 
   const { userId } = await req.user
 
-  const result = await getUserProfile(
-    {
-      dependencies:
-      {
-        userService
-      },
-      payload: {
-        userId: userId
-      }
-    });
-
-  if (result.isSuccess) {
-    res.status(201).json(result);
-  } else {
-    res.status(400).json({ error: result });
+  try {
+    const result = await getUserProfile({ dependencies: { userService }, payload: { userId: userId } });
+    if (result.isSuccess) res.status(201).json(result);
+  } catch (error) {
+    next(error);
   }
 
 });
 
-usersRouter.put("/me", async (req: Request, res: Response) => {
+usersRouter.put("/me", async (req: Request, res: Response, next: NextFunction) => {
 
-  const decodedToken = await req.user
-  if (!decodedToken) {
-    return res.status(401).json({ isSuccess: false, error: 'token missing or invalid' })
-  }
+  const { userId } = await req.user
 
   const userInput = {
     ...req.body,
     updatedAt: req.body.updatedAt || new Date()
   }
 
-  const result = await updateUserProfile(
-    {
-      dependencies:
-      {
-        userService, passwordService
-      },
-      payload: {
-        userId: decodedToken.userId,
-        input: userInput
-      }
-    });
+  const dependencies = { userService, passwordService }
+  const payload = { userId: userId, input: userInput }
 
-  if (result.isSuccess) {
-    res.status(201).json(result);
-  } else {
-    res.status(400).json({ error: result });
+  try {
+    const result = await updateUserProfile({ dependencies: dependencies, payload: payload });
+    if (result.isSuccess) res.status(201).json(result);
+  } catch (error) {
+    next(error);
   }
 
 });
 
-usersRouter.put("/user/:id/role", async (req: Request, res: Response) => {
+usersRouter.put("/user/:id/role", async (req: Request, res: Response, next: NextFunction) => {
 
   const targetUserId = req.params.id
   const role = req.body.role
 
-  if (!targetUserId) return res.status(400).json({ isSuccess: false, error: 'target user id is required' });
+  const { userId } = await req.user
 
-  const decodedToken = await req.user
-  if (!decodedToken) {
-    return res.status(401).json({ isSuccess: false, error: 'token missing or invalid' })
+  const dependencies = { userService }
+  const payload = { adminId: userId, targetUserId: targetUserId as string, role: role }
+
+  try {
+    const result = await assignRole({ dependencies: dependencies, payload: payload });
+    if (result.isSuccess) res.status(201).json(result);
+  } catch (error) {
+    next(error);
   }
 
-  const result = await assignRole(
-    {
-      dependencies:
-      {
-        userService
-      },
-      payload: {
-        adminId: decodedToken.userId,
-        targetUserId: targetUserId,
-        role: role
-      }
-    });
-
-  if (result.isSuccess) {
-    res.status(201).json(result);
-  } else {
-    res.status(400).json({ error: result });
-  }
 })
 
-usersRouter.delete("/user/:id/role", async (req: Request, res: Response) => {
+usersRouter.delete("/user/:id/role", async (req: Request, res: Response, next: NextFunction) => {
 
   const targetIdUser = req.params.id
 
-  if (!targetIdUser) return res.status(400).json({ isSuccess: false, error: 'target user id is required' });
+  const { userId } = await req.user
 
-  const decodedToken = await req.user
-  if (!decodedToken) {
-    return res.status(401).json({ isSuccess: false, error: 'token missing or invalid' })
+  const dependencies = { userService }
+  const payload = { adminId: userId, targetUserId: targetIdUser as string }
+
+  try {
+    const result = await revokeRole({ dependencies: dependencies, payload: payload });
+    if (result.isSuccess) res.status(201).json(result);
+  } catch (error) {
+    next(error);
   }
 
-  const result = await revokeRole(
-    {
-      dependencies:
-      {
-        userService
-      },
-      payload: {
-        adminId: decodedToken.userId,
-        targetUserId: targetIdUser
-      }
-    });
-
-  if (result.isSuccess) {
-    res.status(201).json(result);
-  } else {
-    res.status(400).json({ error: result });
-  }
 })
-
 
 export default usersRouter
