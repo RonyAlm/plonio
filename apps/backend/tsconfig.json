@@ -3,13 +3,11 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "paths": {
-      "plonio-domain": ["../../../dist/index.js"]
-    }
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "node_modules",
     "**/*.test.ts",
