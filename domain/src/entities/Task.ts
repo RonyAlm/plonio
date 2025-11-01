@@ -21,6 +21,7 @@ export interface Task {
     priority: TaskPriority
     projectId: string //(Project.id)
     assigneeId?: string //(User.id)
+    createdBy?: string
     createdAt: Date
     updatedAt: Date
 }
