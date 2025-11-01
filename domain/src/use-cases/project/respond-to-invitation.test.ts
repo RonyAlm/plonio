@@ -3,7 +3,7 @@ import { MokedMemberService, MokedProjectService } from "../../services/mocks/mo
 import { MokedUserService } from "../../services/mocks/mock-user-service.js";
 import { UserRole } from "../../entities/user.js";
 import { MokedInvitationService } from "../../services/mocks/mock-invitation-service.js";
-import { respondToInvitation } from "./respond-to-invitation..js";
+import { respondToInvitation } from "./respond-to-invitation.js";
 import { InvitationStatus } from "../../entities/invitation.js";
 
 describe("RespondToInvitation", async () => {
