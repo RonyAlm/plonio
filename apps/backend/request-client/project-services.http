@@ -2,7 +2,7 @@
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhM2RhZjQ5Yy1mNzYxLTQ1OTAtODVmZS0zODRhMjljOGFhZmYiLCJpYXQiOjE3NjE4NTk1MjgsImV4cCI6MTc2MzA2OTEyOH0.elcAzjM4s1kyIXsTHR9ZR-lwfdnH5xeMu175cZBN2PA
 
 
-### ListProjectsByUse
+### ListProjectsByUser
 GET {{baseUrl}}
 Content-Type: application/json
 Authorization: Bearer {{token}}

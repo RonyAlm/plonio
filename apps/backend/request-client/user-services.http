@@ -31,8 +31,8 @@ POST {{baseUrl}}/register
 Content-Type: application/json
 
 {
-  "name": "Carlo Gomez",
-  "email": "gomez@gmail.com",
+  "name": "Carlo Gomez 3",
+  "email": "gomez3@gmail.com",
   "password": "g412345678"
 }
 
@@ -43,6 +43,15 @@ Content-Type: application/json
 {
   "email": "rony@gmail.com",
   "password": "rony12345678"
+}
+
+### LoginUser 
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "rony@gmail.com",
+  "password": "rony123sd5dsdfs"
 }
 
 ### GetProfile
