@@ -38,7 +38,11 @@ usersRouter.post("/register", async (req: Request, res: Response, next: NextFunc
 
   try {
     const result = await registerUser({ dependencies: { userService, passwordService }, payload: userInput });
-    if (result.isSuccess) res.status(201).json(result);
+    if (result.isSuccess){
+      res.status(201).json(result);
+    } else {
+      res.status(400).json(result);
+    };
   } catch (error) {
     next(error);
   }
@@ -51,7 +55,11 @@ usersRouter.post("/login", async (req: Request, res: Response, next: NextFunctio
 
   try {
     const result = await loginUser({ dependencies: dependencies, payload: req.body });
-    if (result.isSuccess) res.status(201).json(result);
+    if (result.isSuccess) {
+      res.status(201).json(result);
+    } else {
+      res.status(401).json(result);
+    }
   } catch (error) {
     next(error);
   }
