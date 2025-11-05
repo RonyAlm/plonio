@@ -2,9 +2,9 @@
 import '../src/index.css'
 import AuthProvider from '../src/context/auth/authProvider.tsx'
 import type { Preview } from '@storybook/react-vite'
-import { initialize, mswLoader } from 'msw-storybook-addon'
+import { initialize, mswDecorator, mswLoader } from 'msw-storybook-addon'
 
-initialize()
+initialize({ onUnhandledRequest: 'warn' });
 
 const preview: Preview = {
   loaders: [mswLoader],
@@ -25,6 +25,7 @@ const preview: Preview = {
   },
 
   decorators: [
+    mswDecorator,
     (Story) => (
       <AuthProvider>
         <Story />
