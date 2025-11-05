@@ -1,4 +1,5 @@
 export interface ButtonProps {
+    type?: 'submit' | 'reset' | 'button';
     primary?: boolean;
     size?: 'small' | 'medium' | 'large';
     label: string;
@@ -7,6 +8,7 @@ export interface ButtonProps {
 }
 
 const Button = ({
+    type = 'button',
     primary = false,
     size = 'medium',
     label,
@@ -15,8 +17,8 @@ const Button = ({
 }: ButtonProps) => {
     const hasLabel = Boolean(label);
     const mode = primary
-        ? 'bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800 '
-        : 'bg-transparent text-sky-600 border border-sky-600 hover:bg-sky-50 active:bg-sky-100';
+        ? 'bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800 outline-offset-2 outline-sky-600'
+        : 'bg-transparent text-sky-600 border border-sky-600 hover:bg-sky-50 active:bg-sky-100 outline-offset-2 outline-sky-600';
 
     const sizes = {
         small: 'text-sm max-w-[100px]',
@@ -26,11 +28,11 @@ const Button = ({
 
     return (
         <button
-            type="button"
-            className={['w-full flex flex-row gap-1 items-center justify-center py-2 px-4 rounded-full cursor-pointer',
+            type={type}
+            className={['flex flex-row gap-1 items-center justify-center py-2 px-4 rounded-full cursor-pointer',
                 `${sizes[size]}`, mode, !hasLabel && 'p2 aspect-square'].join(' ')}
             onClick={onClick}
-        >
+        >              
             {icon && (icon)}
             {hasLabel && label}
         </button>
