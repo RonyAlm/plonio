@@ -26,7 +26,7 @@ describe("LoginUser", async () => {
         });
 
         expect(result.isSuccess).toBe(true);
-        expect(result.isSuccess && result.data?.accessToken).toBeDefined();
+        expect(result.isSuccess && result.accessToken).toBeDefined();
     });
 
     test("should return error if email is format invalid", async () => {
@@ -46,8 +46,8 @@ describe("LoginUser", async () => {
 
     test("should return error credentials if email or password is invalid", async () => {
         const input = {
-            email: "ema@ema.com",
-            password: "emae433"
+            email: "emda@ema.com",
+            password: "675476665467"
         }
 
         const result = await loginUser({

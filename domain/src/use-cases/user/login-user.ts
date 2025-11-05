@@ -13,7 +13,7 @@ export interface LoginUserParams {
     payload: Pick<User, "email" | "password">;
 }
 
-export type LoginUserResult = Promise<{ isSuccess: boolean; data?: { user: UserSecure; accessToken: string; refreshToken: string }; error?: string }>
+export type LoginUserResult = Promise<{ isSuccess: boolean; user?: UserSecure; accessToken?: string; refreshToken?: string; error?: string }>
 
 export async function loginUser({ dependencies, payload }: LoginUserParams): LoginUserResult {
 
@@ -27,20 +27,23 @@ export async function loginUser({ dependencies, payload }: LoginUserParams): Log
 
     const user = await userService.findByEmail(payload.email);
 
-    if (!user || !user.id) return { isSuccess: false, error: "User not found" };
+    if (!user || !user.id) return { isSuccess: false, error: "Invalid credentials" };
 
+    if(payload.email !== user.email) return { isSuccess: false, error: "Invalid credentials" }; 
     const isValid = await passwordService.compare(payload.password, user.password);
     if (!isValid) return { isSuccess: false, error: "Invalid credentials" };
 
     const tokens = await authService.generateTokens(user.id);
-    return { isSuccess: true, data: { 
+    return {
+        isSuccess: true,
         user: {
             id: user.id as string,
             name: user.name,
             email: user.email,
             role: user.role as UserRole
         },
-        ...tokens
-    } };
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken
+    }
+};
 
-}
